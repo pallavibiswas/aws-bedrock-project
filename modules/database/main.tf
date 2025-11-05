@@ -1,8 +1,10 @@
+data "aws_caller_identity" "current" {}
+
 resource "aws_rds_cluster" "aurora_serverless" {
   cluster_identifier      = var.cluster_identifier
   engine                  = "aurora-postgresql"
   engine_mode             = "provisioned"
-  engine_version          = var.engine_version
+  engine_version          = "15.6"
   database_name           = var.database_name
   master_username         = var.master_username
   master_password         = random_password.master_password.result
@@ -19,13 +21,6 @@ resource "aws_rds_cluster" "aurora_serverless" {
 
   vpc_security_group_ids = [aws_security_group.aurora_sg.id]
   db_subnet_group_name   = aws_db_subnet_group.aurora.name
-}
-
-resource "aws_rds_cluster_instance" "aurora_instance" {
-  cluster_identifier = aws_rds_cluster.aurora_serverless.id
-  instance_class     = "db.serverless"
-  engine             = aws_rds_cluster.aurora_serverless.engine
-  engine_version     = aws_rds_cluster.aurora_serverless.engine_version
 }
 
 resource "aws_db_subnet_group" "aurora" {
@@ -64,11 +59,11 @@ resource "aws_security_group" "aurora_sg" {
 # New resources for secret management
 resource "random_password" "master_password" {
   length  = 16
-  special = true
+  special = false
 }
 
 resource "aws_secretsmanager_secret" "aurora_secret" {
-  name = "${var.cluster_identifier}"
+  name = "${var.cluster_identifier}-${data.aws_caller_identity.current.account_id}"
   recovery_window_in_days = 0
 }
 
@@ -83,4 +78,13 @@ resource "aws_secretsmanager_secret_version" "aurora_secret_version" {
     username            = aws_rds_cluster.aurora_serverless.master_username
     db                  = aws_rds_cluster.aurora_serverless.database_name
   })
+}
+
+resource "aws_rds_cluster_instance" "aurora_instance" {
+  identifier         = "${var.cluster_identifier}-instance-1"
+  cluster_identifier = aws_rds_cluster.aurora_serverless.id
+  instance_class     = "db.serverless"
+  engine             = aws_rds_cluster.aurora_serverless.engine
+  engine_version     = aws_rds_cluster.aurora_serverless.engine_version
+  publicly_accessible = false
 }

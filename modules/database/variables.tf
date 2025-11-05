@@ -33,11 +33,6 @@ variable "preferred_backup_window" {
   default     = "02:00-03:00"
 }
 
-variable "auto_pause" {
-  description = "Whether to enable auto pause"
-  type        = bool
-  default     = true
-}
 
 variable "max_capacity" {
   description = "The maximum capacity units for the cluster"
@@ -51,17 +46,6 @@ variable "min_capacity" {
   default     = 2
 }
 
-variable "seconds_until_auto_pause" {
-  description = "The time in seconds before the cluster is paused"
-  type        = number
-  default     = 300
-}
-
-variable "timeout_action" {
-  description = "The action to take when the timeout is reached"
-  type        = string
-  default     = "ForceApplyCapacityChange"
-}
 
 variable "vpc_id" {
   description = "The VPC ID where the cluster and security group will be created"
@@ -77,4 +61,22 @@ variable "allowed_cidr_blocks" {
   description = "The CIDR blocks allowed to access the cluster"
   type        = list(string)
   default     = ["0.0.0.0/0"]
+}
+
+variable "engine" {
+  description = "The database engine to use"
+  type        = string
+  default     = "aurora-postgresql"
+}
+
+variable "engine_mode" {
+  description = "The database engine mode (e.g., provisioned or serverless)"
+  type        = string
+  default     = "provisioned"
+}
+
+variable "enable_http_endpoint" {
+  description = "Whether to enable the Data API"
+  type        = bool
+  default     = true
 }

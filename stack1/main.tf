@@ -28,16 +28,19 @@ module "vpc" {
 module "aurora_serverless" {
   source = "../modules/database"
 
-  cluster_identifier = "my-aurora-serverless"
-  vpc_id             = module.vpc.vpc_id 
-  subnet_ids         = module.vpc.private_subnets
+  cluster_identifier     = "my-aurora-serverless"
+  vpc_id                 = module.vpc.vpc_id 
+  subnet_ids             = module.vpc.private_subnets
+  database_name          = "myapp"
+  master_username        = "dbadmin"
+  min_capacity           = 0.5
+  max_capacity           = 1
+  allowed_cidr_blocks    = ["10.0.0.0/16"]
 
-  # Optionally override other defaults
-  database_name    = "myapp"
-  master_username  = "dbadmin"
-  max_capacity     = 1
-  min_capacity     = 0.5
-  allowed_cidr_blocks = ["10.0.0.0/16"]   
+  engine                 = "aurora-postgresql"
+  engine_mode            = "provisioned"          
+  engine_version         = "14.6"
+  enable_http_endpoint   = true                   
 }
 
 data "aws_caller_identity" "current" {}
